@@ -1,0 +1,24 @@
+[package]
+name = "ferris-impl"
+version = "0.0.2"
+edition = "2021"
+
+[dependencies]
+ferris-says = "0.3.2"
+wit-bindgen-rt = { version = "0.36.0", features = ["bitflags"] }
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+codegen-units = 1
+opt-level = "s"
+debug = false
+strip = true
+lto = true
+
+[package.metadata.component]
+package = "tanishiking:ferris-impl"
+target = "tanishiking:ferris@0.0.2"
+
+[package.metadata.component.dependencies]
