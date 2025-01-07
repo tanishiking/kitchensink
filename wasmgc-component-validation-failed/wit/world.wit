@@ -1,0 +1,5 @@
+package tanishiking:test@0.0.1;
+
+world socket {
+    import tanishiking:ferris/ferris-says@0.0.2;
+}
