@@ -1,51 +1,72 @@
+(1) Create a module (`socket.wat`) that uses GC types with subtypes:
 
-```sh
-$ cat socket.wat
+```wat
 (module
-  (type $say (func (param i32 i32 i32)))
+  (type $test (func))
   (rec
-    (type $base (sub (struct (field $foo i32))))
-    (type $derived (sub $base (struct (field $foo i32))))
+    (type $Base (sub (struct (field $foo i32))))
+    (type $Derived (sub $Base (struct (field $foo i32))))
   )
-  (import "tanishiking:ferris/ferris-says@0.0.2" "say" (func $say (type $say)))
+  (import "tanishiking:wasmgc-component-test/tester@0.0.1" "test" (func $test (type $test)))
   (export "memory" (memory $mem))
   (memory $mem 1)
 )
 ```
 
-this wasm module is to be composed with [tanishiking:ferris-impl@0.0.2](https://wa.dev/tanishiking:ferris-impl) which is a simple wasm component library of `ferris-say` built/published from [cargo component project](https://github.com/tanishiking/kitchensink/tree/main/ferris-says-component/ferris-impl). (using `cargo component 0.17.0`)
+```wit
+/// wit/world.wit
+package tanishiking:wasmgc-component-test@0.0.1;
+
+world plug {
+    export tester;
+}
+
+world socket {
+    import tester;
+}
+
+interface tester {
+    test: func();
+}
+```
+
+(2) Componetize it:
+
+```sh
+wasm-tools parse socket.wat -o socket.wasm
+wasm-tools component embed wit -o socket.wasm -w socket socket.wasm
+wasm-tools component new -o socket.wasm socket.wasm
+```
+
+
+(3) Build a plugin component (using cargo component)
 
 ```rust
-/// cat src/lib.rs
+// src/lib.rs
 #[allow(warnings)]
 mod bindings;
 
-use bindings::exports::tanishiking::ferris::ferris_says::guest;
+use crate::bindings::exports::tanishiking::wasmgc_component_test::tester::Guest;
 
-use ferris_says::say;
-use std::io::{stdout, bufwriter};
+struct Component;
 
-struct component;
-
-impl guest for component {
-    fn say(content: string, width: u32) {
-        let stdout = stdout();
-        let mut writer = bufwriter::new(stdout.lock());
-        say(content.as_str(), width.try_into().unwrap(), &mut writer).unwrap();
+impl Guest for Component {
+    fn test() {
+        println!("test")
     }
 }
 
-bindings::export!(component with_types_in bindings);
+bindings::export!(Component with_types_in bindings);
 ```
 
-```cargo.toml
+```
+// Cargo.toml
 [package]
-name = "ferris-impl"
-version = "0.0.2"
+name = "wasmgc-component-test"
+version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ferris-says = "0.3.2"
 wit-bindgen-rt = { version = "0.36.0", features = ["bitflags"] }
 
 [lib]
@@ -59,30 +80,29 @@ strip = true
 lto = true
 
 [package.metadata.component]
-package = "tanishiking:ferris-impl"
-target = "tanishiking:ferris@0.0.2"
+package = "tanishiking:wasmgc-component-test"
+
+[package.metadata.component.target]
+world = "plug"
 
 [package.metadata.component.dependencies]
 ```
 
----
+```sh
+$ cargo component build -r --target wasm32-wasip2
+```
+
+
+(4) Compose the `socket.wasm` module with plug:
 
 ```sh
-$ wasm-tools --version
-wasm-tools 1.222.0 (892d4b6ef 2024-12-18)
+$ wac plug --plug target/wasm32-wasip1/release/wasmgc_component_test.wasm -o out.wasm
+```
 
-# using local build for wac of
-# https://github.com/bytecodealliance/wac/commit/6c22d80fc5fe6331b28c6d1482e8f9b60a8785f3
-# to support gc types
-$ wac --version
-wac-cli 0.7.0-dev
+(5) Validate
 
-$ make
-wasm-tools parse socket.wat -o socket.wasm
-wasm-tools component embed wit -o socket.wasm socket.wasm
-wasm-tools component new -o socket.wasm socket.wasm
-wac plug --plug tanishiking:ferris-impl socket.wasm -o out.wasm
-rust_backtrace=1 wasm-tools validate out.wasm
+```sh
+$ RUST_BACKTRACE=1 wasm-tools validate out.wasm
 thread 'main' panicked at crates/wasmparser/src/validator/types.rs:998:70:
 indexmap: index out of bounds
 stack backtrace:
@@ -97,5 +117,6 @@ stack backtrace:
    8: wasm_tools::wasmtools::run
    9: wasm_tools::main
 note: some details are omitted, run with `rust_backtrace=full` for a verbose backtrace.
-make: *** [validate] error 101
 ```
+
+**Interestingly, when I removed `println!` macro from `src/lib.rs`, there's no problem in validation**

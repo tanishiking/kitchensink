@@ -1,5 +1,13 @@
-package tanishiking:test@0.0.1;
+package tanishiking:wasmgc-component-test@0.0.1;
+
+world plug {
+    export tester;
+}
 
 world socket {
-    import tanishiking:ferris/ferris-says@0.0.2;
+    import tester;
+}
+
+interface tester {
+    test: func();
 }
