@@ -1,0 +1,13 @@
+package tanishiking:test@0.0.1;
+
+world socket {
+    import addr;
+}
+
+world plug {
+    export addr;
+}
+
+interface addr {
+    add: func(a: s32, b: s32) -> s32;
+}
