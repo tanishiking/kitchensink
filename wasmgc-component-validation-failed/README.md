@@ -1,3 +1,5 @@
+fixed https://github.com/bytecodealliance/wasm-tools/pull/1968
+
 (1) Create a module (`socket.wat`) that uses GC types with subtypes:
 
 ```wat
