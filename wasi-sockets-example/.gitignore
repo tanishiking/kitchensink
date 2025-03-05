@@ -1,0 +1,7 @@
+.vscode
+.scala-build
+.bsp
+target
+
+src/bindings.rs
+wit/deps

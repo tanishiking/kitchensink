@@ -1,0 +1,8 @@
+package component:wasi-sockets-example;
+
+world example {
+  export wasi:cli/run@0.2.0;
+
+  include wasi:sockets/imports@0.2.0;
+  include wasi:io/imports@0.2.0;
+}
