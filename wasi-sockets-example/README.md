@@ -14,6 +14,9 @@ $ cargo component build --target wasm32-wasip2 -r
 $ scala-cli server.scala
 Server started on 127.0.0.1:8000
 
+# or in python
+$ python server.py
+
 # send message to the server
 $ wasmtime -S inherit-network=y target/wasm32-wasip1/release/wasi_sockets_example.wasm
 
