@@ -10,11 +10,6 @@ $ cargo component build --target wasm32-wasip2 -r
 ## Run
 
 ```sh
-# start server on 127.0.0.1:8080
-$ scala-cli server.scala
-Server started on 127.0.0.1:8000
-
-# or in python
 $ python server.py
 
 # send message to the server
