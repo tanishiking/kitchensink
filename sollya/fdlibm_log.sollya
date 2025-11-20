@@ -1,0 +1,14 @@
+d = 6;
+dom = [2^(-100), 0.1716^2];
+f = (2 * atanh(sqrt(x)) / sqrt(x) - 2) / x;
+p = remez(f, d, dom);
+
+for n from 0 to d do {
+   c = coeff(p, n);
+   print("Lg" @ (n+1) @ ":", c);
+};
+
+e = x * p - (2 * atanh(sqrt(x)) / sqrt(x) - 2);
+m = dirtyinfnorm(e, dom);
+print(m);
+
