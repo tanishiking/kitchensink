@@ -1,4 +1,4 @@
-//> using scala 3.nightly
+//> using scala 3
 
 import language.experimental.captureChecking
 import caps.Capability
@@ -24,6 +24,11 @@ enum MyList[+A]:
   val data = MyList.Cons(1, MyList.Cons(2, MyList.Nil))
 
   val c: Counter^ = new Counter
+  val a: Counter^{c} = c
+
+  val increment: (() -> Unit)^{c} = () => {
+    a.inc()
+  }
 
   // val increment: (() -> Unit)^{c1} = () => {
   //   c1.inc()
