@@ -3,7 +3,7 @@
 import scala.language.experimental.captureChecking
 import scala.language.experimental.separationChecking
 
-import caps.*
+import caps.Mutable
 
 class Ref(init: Int) extends Mutable:
   private var current = init

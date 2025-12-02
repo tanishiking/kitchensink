@@ -1,3 +1,4 @@
+*.wasm
 .scala-build
 .bsp
 .metals
